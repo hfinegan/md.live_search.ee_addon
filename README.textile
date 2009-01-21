@@ -20,7 +20,7 @@ h2. Changelog
 * Now requires jQuery again (Karl Swedberg)
 * Fixed the 'e' is not defined error (Karl Swedberg)
 * Up/Down arrows work for entry selection again (Karl Swedberg)
-* A few new CSS styles
+* A few new CSS styles for the entries selection
 
 1.1.8 (Jan 04, 2009)
 
