@@ -5,7 +5,7 @@ Adds a live search to the EE control panel header.
             
 INFO ---------------------------
 Created:   Sep 06 2006 (Mark Huot, hcphilly.com)
-Last Mod:  Jan 04 2009
+Last Mod:  Jan 20 2009
 
 Original:
 Related Thread: http://expressionengine.com/forums/viewthread/38361/
