@@ -20,7 +20,7 @@ search results to show when it was put in. So, commented out for now. */
 // if ( ! defined('EXT')) { exit('Invalid file request'); }
 
 if ( ! defined('MD_LS_version')){
-	define("MD_LS_version",			"1.1.8");
+	define("MD_LS_version",			"1.1.9");
 	define("MD_LS_docs_url",		"http://www.masugadesign.com/the-lab/scripts/md-live-search/");
 	define("MD_LS_addon_id",		"MD Live Search");
 	define("MD_LS_extension_class",	"Md_livesearch");
@@ -1165,6 +1165,7 @@ ob_end_clean();
 		
 	  }
 	
+/* END class */
 }
-
-?>
+/* End of file ext.md_livesearch.php */
+/* Location: ./system/extensions/ext.md_livesearch.php */ 

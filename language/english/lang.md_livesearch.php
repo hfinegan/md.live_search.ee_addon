@@ -1,8 +1,6 @@
 <?php
 /*
 Extension:     ext.md_livesearch.php
-Created:       Oct 25 2008
-Last Modified: Jan 04 2008
 =================================================
 ryan masuga, masugadesign.com
 ryan@masugadesign.com
