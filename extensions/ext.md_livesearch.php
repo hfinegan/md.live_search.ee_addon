@@ -409,15 +409,17 @@ $css = '
 #livesearch-results li ol li a:link,
 #livesearch-results li ol li a:visited
 	{
-	color: #1D7FC6;
+  color: #1D7FC6;
 	display: block;
 	padding: 5px;
 	}
 
-#livesearch-results li ol li a:hover {
-	background: #EEF4F9;
-	}
-
+#livesearch-results li ol li a:hover,
+#livesearch-results li ol li.selected a:link,
+#livesearch-results li ol li.selected a:visited {
+  background-color: #3D525F;
+  color: #fff;
+}
 .livesearch-results_weblog_title {
 	color: #999;
 	font-size: 10px;
@@ -621,7 +623,7 @@ ob_start();
 	        oldonload();
 	      }
 	      func();
-	    }
+	    };
 	  }
 	}
 	
@@ -656,36 +658,65 @@ ob_start();
 	
 	function delegate( that, thatMethod )
     {
-        return function() { return thatMethod.call(that); }
+        return function() { return thatMethod.call(that); };
     }
 	
-	function livesearch()
-	{
-		document.getElementById("livesearch-query").onfocus = function()
-		{
-			if(this.value == "Live Search")
-			{
+	function livesearch() {
+		$("#livesearch-query")
+		.focus(function() {
+		  if(this.value == "Live Search") {
 			    this.value = "";
 			}
-			
-			this.onkeyup();
-		}
-		document.getElementById("livesearch-query").onblur = function()
-		{
-			if(this.value == "")
-			{
+		})
+		.blur(function() {
+		  if (this.value == "") {
 				this.className = "grey";
 				this.value = "Live Search";
 			}
 			
-			if(document.getElementById("livesearch-results"))
-			{
+			if(document.getElementById("livesearch-results")) {
 				// comment out the following line for inspecting and testing styles
-				document.getElementById("livesearch-results").parentNode.removeChild(document.getElementById("livesearch-results"));
+        document.getElementById("livesearch-results").parentNode.removeChild(document.getElementById("livesearch-results"));
 				lastValue = '';
 			}
-		}
-		document.getElementById("livesearch-query").onkeyup = keypressed;
+		}).keyup(function(e) {
+        d = new Date();
+  			if(d.getTime() > lastTime+100) {
+          code = e.which;
+          if (code == 27) {
+            this.blur();
+            return;
+          }
+    			if(code == 13 && returnLocation != false) {
+    				window.location = returnLocation;
+    			}
+  			  if((code == 38 || code == 40) && document.getElementById("livesearch-results")) {
+    				var lis = [];
+    				var ols = document.getElementById("livesearch-results").getElementsByTagName("ol");
+    				for(var i=0; i<ols.length; i++) {
+    					for(var j=0; j<ols[i].childNodes.length; j++) {
+    						lis.push(ols[i].childNodes[j]);
+    					}
+    				}
+    				if(code == 38) {
+    					selectNext(lis.reverse());
+    				}
+    				else if(code == 40)	{
+    					selectNext(lis);
+    				}
+  			  }
+
+          var text = document.getElementById("livesearch-query");
+    			if(text.value != "" && text.value != lastValue) {
+  				  text.className = "";
+  				  ajax(extension_url+text.value, searchresults);
+  			  } else if(text.value == "" && document.getElementById("livesearch-results")) {
+  				  document.getElementById("livesearch-results").parentNode.removeChild(document.getElementById("livesearch-results"));
+  			  }
+        lastValue = text.value;
+  		}
+  		lastTime = d.getTime();
+		});
 	}
 	
 	var d = new Date();
@@ -697,59 +728,8 @@ ob_start();
 	// 38 = up arrow
 	// 40 = down arrow
 	
-	function keypressed(e)
-	{
-	    d = new Date();
+	function keypressed(e) {
 
-			if(d.getTime() > lastTime+100)
-		{
-		  code = -1;
-			if (!e) var e = window.event;
-			if (e.keyCode) code = e.keyCode;
-			else if (e.which) code = e.which;
-
-			
-			if(code == 13 && returnLocation != false)
-			{
-				window.location = returnLocation;
-			}
-
-			if((code == 38 || code == 40) && document.getElementById("livesearch-results"))
-			{
-				var lis = new Array();
-				var ols = document.getElementById("livesearch-results").getElementsByTagName("ol");
-				for(var i=0; i<ols.length; i++)
-				{
-					for(var j=0; j<ols[i].childNodes.length; j++)
-					{
-						lis.push(ols[i].childNodes[j]);
-					}
-				}
-
-				if(code == 38)
-				{
-					selectNext(lis.reverse());
-				}
-				else if(code == 40)
-				{
-					selectNext(lis);
-				}
-			}
-            
-      var text = document.getElementById("livesearch-query");
-			if(text.value != "" && text.value != lastValue)
-			{
-				text.className = "";
-				ajax(extension_url+text.value, searchresults);
-			}
-			else if(text.value == "" && document.getElementById("livesearch-results"))
-			{
-				document.getElementById("livesearch-results").parentNode.removeChild(document.getElementById("livesearch-results"));
-			}
-
-			lastValue = text.value;
-		}
-		lastTime = d.getTime();
 	}
 	
 	function setSelected( li )
@@ -788,6 +768,7 @@ ob_start();
 				lis[i].className = "";
 				if(lis[i+1])
 				{
+          
 					lis[i+1].className = "selected";
 					returnLocation = lis[i+1].firstChild.href;
 					window.status = returnLocation;
@@ -822,7 +803,7 @@ ob_start();
 			
 			var results = document.createElement("ul");
 				results.id = "livesearch-results";
-			
+			  
 			var entry_list = xmlToLi(dom.getElementsByTagName("entries").item(0));
 			if(entry_list.length > 0)
 			{
@@ -860,7 +841,7 @@ ob_start();
 			}
 		
 			document.body.appendChild(results);
-			
+			$('#livesearch-results').css({top: $('#livesearch-query').offset().top + $('#livesearch-query').height()});
 			if(results.getElementsByTagName("ol").length > 0)
 			{
 				if(results.getElementsByTagName("ol").item(0).getElementsByTagName("li").length > 0)
@@ -977,11 +958,11 @@ ob_start();
 				entry_li.onmouseover = function()
 				{
 					setSelected(this);
-				}
+				};
 				entry_li.onmousedown = function()
 				{
 					window.location = this.firstChild.href;
-				}
+				};
 			}
 			nodes.push(entry_li);
 		}
@@ -989,7 +970,9 @@ ob_start();
 		return nodes;
 	}
 	
-	addLoadEvent(livesearch);
+	$(window).bind('load', livesearch);
+	
+  // addLoadEvent(livesearch);
 </script>
 <?php
 $thejs .= ob_get_contents();
