@@ -1,15 +1,16 @@
 h1. MD Live Search
 
 *ext.md_livesearch.php*
+
 Add a Live Search field to the top of your EE Control Panel.
 
 h2. Info
 
-Developed by Ryan Masuga, http://masugadesign.com
-COntributions from Karl Swedberg (http://learningjquery.com)
+Developed by Ryan Masuga, http://masugadesign.com<br />
+Contributions from Karl Swedberg (http://learningjquery.com)<br />
 Based on and inspired by Mark Huot's original Live Search Extension. (http://docs.markhuot.com)
 
-Docs: http://www.masugadesign.com/the-lab/scripts/md-live-search/
+Docs: "http://www.masugadesign.com/the-lab/scripts/md-live-search/":http://www.masugadesign.com/the-lab/scripts/md-live-search/ <br />
 EE Extension Info: http://expressionengine.com/docs/development/extensions.html
 
 h2. Changelog
@@ -54,7 +55,7 @@ h2. Changelog
 * Moved CSS to settings.
 * Moved javascript file to external js file
 * Reduced some redundant code
-		
+
 1.1.2 
 
 * Minor changes to the 1.1.1 settings
@@ -67,11 +68,11 @@ h2. Changelog
 
 <hr />
 
-Mark Huot's work below:			 
-1.0.3 - Capitialization error was throwing errors, fixed now
-1.0.2 - Now plays nice with other extensions, using $EXT->last_call
-1.0.1 - Fixed a bug with settings being offered even though there aren't any
-			- Fixed a bug where $_GET["S"] wasn't defined
+*Mark Huot's work below:*<br />
+1.0.3 - Capitialization error was throwing errors, fixed now<br />
+1.0.2 - Now plays nice with other extensions, using $EXT->last_call<br />
+1.0.1 - Fixed a bug with settings being offered even though there aren't any<br />
+			- Fixed a bug where $_GET["S"] wasn't defined<br />
 1.0.0 - INITIAL RELEASE
 
 <hr />
