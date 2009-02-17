@@ -602,7 +602,7 @@ $css = '
 
 		$headstuff= '';	
 
-		$ext_url = $PREFS->core_ini['site_url'].$PREFS->core_ini['system_folder'].'/extensions/'. MD_Ext_Filename .'?ls_get_query=';
+		$ext_url = '/'.$PREFS->core_ini['system_folder'].'/extensions/'. MD_Ext_Filename .'?ls_get_query=';
 	
 		$js = '<script type="text/javascript" charset="utf-8">var SESSION="'.$IN->GBL('S').'";</script>';		
 		$js.= '<script type="text/javascript" charset="utf-8">var extension_url = "'.$ext_url.'";</script>'.NL;
