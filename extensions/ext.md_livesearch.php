@@ -5,7 +5,7 @@ Adds a live search to the EE control panel header.
             
 INFO ---------------------------
 Created:   Sep 06 2006 (Mark Huot, hcphilly.com)
-Last Mod:  Jan 20 2009
+Last Mod:  Feb 27 2009
 
 Original:
 Related Thread: http://expressionengine.com/forums/viewthread/38361/
@@ -15,12 +15,12 @@ Related Thread: http://expressionengine.com/forums/viewthread/---/ none yet
 		
 http://expressionengine.com/docs/development/extensions.html
 =============================================================================== */
-/* The following line needs to be in most extesnions, however, I could not get the
+/* The following line needs to be in most extensions, however, I could not get the
 search results to show when it was put in. So, commented out for now. */
-// if ( ! defined('EXT')) { exit('Invalid file request'); }
+//if ( ! defined('EXT')) { exit('Invalid file request'); }
 
 if ( ! defined('MD_LS_version')){
-	define("MD_LS_version",			"1.1.9");
+	define("MD_LS_version",			"1.2.0");
 	define("MD_LS_docs_url",		"http://www.masugadesign.com/the-lab/scripts/md-live-search/");
 	define("MD_LS_addon_id",		"MD Live Search");
 	define("MD_LS_extension_class",	"Md_livesearch");
@@ -46,6 +46,8 @@ class Md_livesearch {
 
   var $js_heading_set = false;
 
+ 	//const CONST_VALUE = $PREFS->ini('site_id');
+
 // --------------------------------
 //  PHP 4 Constructor
 // --------------------------------
@@ -59,7 +61,7 @@ class Md_livesearch {
 // --------------------------------
 	function __construct($settings='')
 	{
-		global $IN, $SESS;
+		global $IN, $SESS, $PREFS;
 		if(isset($SESS->cache['mdesign']) === FALSE){ $SESS->cache['mdesign'] = array();}
 		$this->settings = $this->_get_settings();
 		$this->debug = $IN->GBL('debug');
@@ -588,7 +590,7 @@ $css = '
 	}
     
 
-    function show_full_control_panel_end( $out )
+  function show_full_control_panel_end( $out )
 	  {
 		global $EXT, $DSP, $IN, $SESS, $LANG, $PREFS;
 		
@@ -599,20 +601,26 @@ $css = '
 		
 		if($this->settings['enable'] == 'y')
 		{
-
-		$headstuff= '';	
-
-		$ext_url = '/'.$PREFS->core_ini['system_folder'].'/extensions/'. MD_Ext_Filename .'?ls_get_query=';
+		
+		// Get the current Site ID
+		$site_id = $PREFS->ini('site_id');
+		
+		// You may need to modify the following line, based on whether or not you prefer to used a masked control panel, or
+		// have installed EE into a subdirectory.
+		// The following line is the default. 
+		$ext_url = '/'.$PREFS->core_ini['system_folder'].'/extensions/'. MD_Ext_Filename .'?sid='.$site_id.'&ls_get_query=';
+		
+		// If you've installed into a subdirectory/subdomain, you may need to use the following line instead.
+		//$ext_url = $PREFS->core_ini['site_url'].$PREFS->core_ini['system_folder'].'/extensions/'. MD_Ext_Filename .'?sid='.$site_id.'&ls_get_query=';
 	
 		$js = '<script type="text/javascript" charset="utf-8">var SESSION="'.$IN->GBL('S').'";</script>';		
 		$js.= '<script type="text/javascript" charset="utf-8">var extension_url = "'.$ext_url.'";</script>'.NL;
-
-		//$headstuff .= $js;	
+	
 		
 ob_start();
 ?>
 <script type="text/javascript" charset="utf-8">
-
+(function($){	
 	function addLoadEvent(func) {
 	  var oldonload = window.onload;
 	  if (typeof window.onload != 'function') {
@@ -971,7 +979,7 @@ ob_start();
 	}
 	
 	$(window).bind('load', livesearch);
-	
+})(jQuery);	
   // addLoadEvent(livesearch);
 </script>
 <?php
@@ -982,9 +990,7 @@ ob_end_clean();
 		$out .= $thejs;
 	
 
-	
-		$new_styles = $this->settings['css']; 
-		$headstuff .= '<style type="text/css" media="screen">'.$new_styles.'</style>';
+		$headstuff = '<style type="text/css" media="screen">'.$this->settings['css'].'</style>';
 
 			// this stuff needs to go at the bottom to avoid conflicts
 			//$out = str_replace("</body>", $fireup . "</body>", $out);
@@ -1001,13 +1007,13 @@ ob_end_clean();
 
 	function LiveSearchResults()
 	  {
-	    //global $DB, $DSP, $LANG, $IN, $PREFS, $SESS;
-				
 	  define('EXT', 'tricky');
 		require_once("../config.php");
+		
 		header("Content-type:text/xml");
-			
+
 		$livequery = $_GET["ls_get_query"];
+		$site_id = $_GET["sid"];
 
 		$results = array("entries" => 'entry', "comments" => 'comment');
 		
@@ -1022,6 +1028,7 @@ ob_end_clean();
 		//	Get searchable fields
 		$fields = array();
 		$query = mysql_query("SELECT field_id FROM exp_weblog_fields");
+		
 		while($field = mysql_fetch_object($query))
 		{
 			$fields[] = "d.field_id_".$field->field_id;
@@ -1054,7 +1061,9 @@ ob_end_clean();
 				  
 				if ($resultKey == "entries")
 				{
-					  
+					
+					$site_search = "AND t.site_id='".$site_id."'";
+					
 					# Begin Fix for sort by.
 					if ($settings_md['sort_by'] == "DATE")
 					{
@@ -1093,7 +1102,10 @@ ob_end_clean();
 
 				}
 				elseif ($resultKey == "comments")
-				{  
+				{ 
+					
+					$site_search = "AND c.site_id='".$site_id."'";
+					
 					if ($settings_md['sort_by'] == "DATE")
 					  $sort_by_type = "c.comment_date";
 					elseif ($settings_md['sort_by'] == "TITLE")
@@ -1116,9 +1128,9 @@ ob_end_clean();
 				
 
 				if ($resultKey == "entries")
-				  $query = mysql_query("SELECT DISTINCT ".$display_status." t.entry_id, t.weblog_id, t.title, w.blog_title".$display_date." FROM exp_weblog_titles AS t, exp_weblog_data AS d, ".$display_status2." exp_weblogs AS w WHERE t.entry_id=d.entry_id AND t.weblog_id = w.weblog_id ".$display_status3." AND (t.title LIKE '%".mysql_real_escape_string($livequery)."%' OR ".implode(" LIKE '%".mysql_real_escape_string($livequery)."%' OR ", $fields)." LIKE '%".mysql_real_escape_string($livequery)."%') ORDER BY ".$sort_by_type." ".$sort_order." LIMIT ".$max_results."");
+				  $query = mysql_query("SELECT DISTINCT ".$display_status." t.entry_id, t.weblog_id, t.title, w.blog_title".$display_date." FROM exp_weblog_titles AS t, exp_weblog_data AS d, ".$display_status2." exp_weblogs AS w WHERE t.entry_id=d.entry_id AND t.weblog_id = w.weblog_id ".$display_status3." {$site_search} AND (t.title LIKE '%".mysql_real_escape_string($livequery)."%' OR ".implode(" LIKE '%".mysql_real_escape_string($livequery)."%' OR ", $fields)." LIKE '%".mysql_real_escape_string($livequery)."%') ORDER BY ".$sort_by_type." ".$sort_order." LIMIT ".$max_results."");
 				elseif ($resultKey == "comments")
-				  $query = mysql_query("SELECT c.comment_id, c.entry_id, c.weblog_id, c.comment AS title, w.blog_title".$display_date." FROM exp_comments AS c, exp_weblogs AS w WHERE c.weblog_id = w.weblog_id AND c.comment LIKE '%".mysql_real_escape_string($livequery)."%' ORDER BY ".$sort_by_type." ".$sort_order." LIMIT ".$max_results."");
+				  $query = mysql_query("SELECT c.comment_id, c.entry_id, c.weblog_id, c.comment AS title, w.blog_title".$display_date." FROM exp_comments AS c, exp_weblogs AS w WHERE c.weblog_id = w.weblog_id {$site_search} AND c.comment LIKE '%".mysql_real_escape_string($livequery)."%' ORDER BY ".$sort_by_type." ".$sort_order." LIMIT ".$max_results."");
 				else
 				  {
 		
@@ -1131,7 +1143,7 @@ ob_end_clean();
 					$r .= "\t\t<$resultValue>\r";
 					
 					foreach($entries_or_comments as $ecKey=>$ecValue)
-					  {
+					{
 					    if ($ecKey == "display_date")
 							{
 								$ecValue = date("Y/m/d g:i A",$ecValue);	 
@@ -1150,8 +1162,7 @@ ob_end_clean();
 					  }
 					  
 					$r .= "\t\t</$resultValue>\r";
-					
-				}
+					}
 				
 				$r .= "\t</$resultKey>\r";
 				  
