@@ -1027,7 +1027,7 @@ ob_end_clean();
 
 		//	Get searchable fields
 		$fields = array();
-		$query = mysql_query("SELECT field_id FROM exp_weblog_fields");
+		$query = mysql_query("SELECT field_id FROM exp_weblog_fields WHERE field_search='y'");
 		
 		while($field = mysql_fetch_object($query))
 		{

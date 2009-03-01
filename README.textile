@@ -2,7 +2,7 @@ h1. MD Live Search
 
 *ext.md_livesearch.php*
 
-Add a Live Search field to the top of your EE Control Panel to search entries and (optionally) comments. MD Live Search will search those fields that are set as "searchable" in your ExpressionEngine control panel.
+Add a Live Search field to the top of your EE Control Panel to search entries and (optionally) comments. MD Live Search will search those fields that are set as "searchable" in your ExpressionEngine control panel
 
 h2. Info
 
@@ -22,6 +22,7 @@ h2. Changelog
 * Really fixed the MSM search. The search now respects the site you're currently on.
 * General clean up; couple typo fixes
 * Updated the README
+* Fixed to search only fields designated as searchable.
 
 1.1.9 (Jan 21, 2009)
 
