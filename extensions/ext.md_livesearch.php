@@ -5,7 +5,7 @@ Adds a live search to the EE control panel header.
             
 INFO ---------------------------
 Created:   Sep 06 2006 (Mark Huot, hcphilly.com)
-Last Mod:  Feb 27 2009
+Last Mod:  Mar 05 2009
 
 Original:
 Related Thread: http://expressionengine.com/forums/viewthread/38361/
@@ -20,7 +20,7 @@ search results to show when it was put in. So, commented out for now. */
 //if ( ! defined('EXT')) { exit('Invalid file request'); }
 
 if ( ! defined('MD_LS_version')){
-	define("MD_LS_version",			"1.2.0");
+	define("MD_LS_version",			"1.2.1");
 	define("MD_LS_docs_url",		"http://www.masugadesign.com/the-lab/scripts/md-live-search/");
 	define("MD_LS_addon_id",		"MD Live Search");
 	define("MD_LS_extension_class",	"Md_livesearch");
@@ -991,7 +991,7 @@ ob_start();
 	
 	$(window).bind('load', livesearch);
 })(jQuery);	
-  // addLoadEvent(livesearch);
+  
 </script>
 <?php
 $thejs = ob_get_contents();
@@ -1016,53 +1016,6 @@ ob_end_clean();
 	}
 
 
-
-	/**
-	 * Sessions Start
-	 * This is borrowed from Brrandon Kelly's Playa 2.
-	 * If it works, 
-	 */
-/* 	function sessions_start()
-	{
-		global $IN, $REGX, $DB;
-
-		// Does the world revolve around Playa?
-		//if ($IN->GBL('C') != 'playa') return;
-
-		if ($IN->GBL('M') == 'search')
-		{
-			// import the Search module
-			if ( ! class_exists('Search'))
-			{
-	        	require PATH_MOD.'search/mod.search'.EXT;
-			}
-
-			$entry_ids = array();
-			$M = new Search();
-			$_POST['weblog_id'] = explode('|', $_GET['weblogs']);
-			$_POST['search_in'] = 'everywhere';
-			$_POST['where'] = 'all';
-			$M->keywords = $REGX->keyword_clean($_GET['keywords']);
-			if ($sql = $M->build_standard_query())
-			{
-				$query = $DB->query($sql);
-				foreach($query->result as $row)
-				{
-					$entry_ids[] = '"'.$row['entry_id'].'"';
-				}
-			}
-
-			header('Cache-Control: no-cache, must-revalidate');
-			header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-			header('Content-type: application/json');
-			exit('({"entries":[' . implode(',', $entry_ids) . ']})');
-		}
-	}
-
- */
-
-
-
 	function LiveSearchResults()
 	  {
 	  define('EXT', 'tricky');
@@ -1082,11 +1035,6 @@ ob_end_clean();
 		$settings_md = mysql_query("SELECT `settings` FROM exp_extensions WHERE enabled = 'y' AND class = 'MD_livesearch' LIMIT 1") or die(mysql_error());
 		$settings_md = unserialize(mysql_result($settings_md, 0));
 		$settings_md = $settings_md[1];
-		
-		
-		// Get the weblogs the currently logged-in user has access to
-		
-		
 
 		//	Get searchable fields
 		$fields = array();
@@ -1126,6 +1074,7 @@ ob_end_clean();
 				{
 					
 					$site_search = "AND t.site_id='".$site_id."'";
+					$weblogs_search = "AND t.weblog_id IN(".$allowed_weblogs.")";				
 					
 					# Begin Fix for sort by.
 					if ($settings_md['sort_by'] == "DATE")
@@ -1162,6 +1111,7 @@ ob_end_clean();
 						$display_status3 = "AND s.status=t.status";
 					}
 				
+				
 
 				}
 				elseif ($resultKey == "comments")
@@ -1191,7 +1141,7 @@ ob_end_clean();
 				
 
 				if ($resultKey == "entries")
-				  $query = mysql_query("SELECT DISTINCT ".$display_status." t.entry_id, t.weblog_id, t.title, w.blog_title".$display_date." FROM exp_weblog_titles AS t, exp_weblog_data AS d, ".$display_status2." exp_weblogs AS w WHERE t.entry_id=d.entry_id AND t.weblog_id = w.weblog_id ".$display_status3." {$site_search} AND (t.title LIKE '%".mysql_real_escape_string($livequery)."%' OR ".implode(" LIKE '%".mysql_real_escape_string($livequery)."%' OR ", $fields)." LIKE '%".mysql_real_escape_string($livequery)."%') ORDER BY ".$sort_by_type." ".$sort_order." LIMIT ".$max_results."");
+				  $query = mysql_query("SELECT DISTINCT ".$display_status." t.entry_id, t.weblog_id, t.title, w.blog_title".$display_date." FROM exp_weblog_titles AS t, exp_weblog_data AS d, ".$display_status2." exp_weblogs AS w WHERE t.entry_id=d.entry_id AND t.weblog_id = w.weblog_id ".$display_status3." {$site_search} {$weblogs_search} AND (t.title LIKE '%".mysql_real_escape_string($livequery)."%' OR ".implode(" LIKE '%".mysql_real_escape_string($livequery)."%' OR ", $fields)." LIKE '%".mysql_real_escape_string($livequery)."%') ORDER BY ".$sort_by_type." ".$sort_order." LIMIT ".$max_results."");
 				elseif ($resultKey == "comments")
 				  $query = mysql_query("SELECT c.comment_id, c.entry_id, c.weblog_id, c.comment AS title, w.blog_title".$display_date." FROM exp_comments AS c, exp_weblogs AS w WHERE c.weblog_id = w.weblog_id {$site_search} AND c.comment LIKE '%".mysql_real_escape_string($livequery)."%' ORDER BY ".$sort_by_type." ".$sort_order." LIMIT ".$max_results."");
 				else

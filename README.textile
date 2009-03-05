@@ -15,7 +15,12 @@ EE Extension Info: http://expressionengine.com/docs/development/extensions.html
 
 h2. Changelog
 
-*1.2.0 (Feb 27, 2009)*
+*1.2.1 (Mar 05, 2009)*
+
+* Now only searching weblogs the currently logged-in user has access to. There wasn't a check in place for this previously.
+* Minor cleanup
+
+1.2.0 (Feb 27, 2009)
 
 * Fixed a jQuery conflict that arose when installed along with some other add-ons
 * Added a version of the extension URL line you may need to use if you have installed EE in a subdirectory or subdomain (commented out by default)
