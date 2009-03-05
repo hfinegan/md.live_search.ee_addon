@@ -605,10 +605,21 @@ $css = '
 		// Get the current Site ID
 		$site_id = $PREFS->ini('site_id');
 		
+			//$weblogs = $SESS->userdata['assigned_weblogs']; //print_r ($weblogs);
+			// Array ( [3] => Forbidden Zone [1] => Weblog v1 ) 
+		
+		$weblogs = array();
+		
+		foreach ($SESS->userdata['assigned_weblogs'] as $weblog_id => $weblog_title)
+        {
+            $weblogs[] = $weblog_id;
+        }
+				$foobar = implode(",", $weblogs); //print_r ($foobar);
+		
 		// You may need to modify the following line, based on whether or not you prefer to used a masked control panel, or
 		// have installed EE into a subdirectory.
 		// The following line is the default. 
-		$ext_url = '/'.$PREFS->core_ini['system_folder'].'/extensions/'. MD_Ext_Filename .'?sid='.$site_id.'&ls_get_query=';
+		$ext_url = '/'.$PREFS->core_ini['system_folder'].'/extensions/'. MD_Ext_Filename .'?sid='.$site_id.'&wb='.$foobar.'&ls_get_query=';
 		
 		// If you've installed into a subdirectory/subdomain, you may need to use the following line instead.
 		//$ext_url = $PREFS->core_ini['site_url'].$PREFS->core_ini['system_folder'].'/extensions/'. MD_Ext_Filename .'?sid='.$site_id.'&ls_get_query=';
@@ -983,7 +994,7 @@ ob_start();
   // addLoadEvent(livesearch);
 </script>
 <?php
-$thejs .= ob_get_contents();
+$thejs = ob_get_contents();
 ob_end_clean();
 		
 		$out .= $js;
@@ -1003,7 +1014,54 @@ ob_end_clean();
 		
 		return $out;
 	}
-	
+
+
+
+	/**
+	 * Sessions Start
+	 * This is borrowed from Brrandon Kelly's Playa 2.
+	 * If it works, 
+	 */
+/* 	function sessions_start()
+	{
+		global $IN, $REGX, $DB;
+
+		// Does the world revolve around Playa?
+		//if ($IN->GBL('C') != 'playa') return;
+
+		if ($IN->GBL('M') == 'search')
+		{
+			// import the Search module
+			if ( ! class_exists('Search'))
+			{
+	        	require PATH_MOD.'search/mod.search'.EXT;
+			}
+
+			$entry_ids = array();
+			$M = new Search();
+			$_POST['weblog_id'] = explode('|', $_GET['weblogs']);
+			$_POST['search_in'] = 'everywhere';
+			$_POST['where'] = 'all';
+			$M->keywords = $REGX->keyword_clean($_GET['keywords']);
+			if ($sql = $M->build_standard_query())
+			{
+				$query = $DB->query($sql);
+				foreach($query->result as $row)
+				{
+					$entry_ids[] = '"'.$row['entry_id'].'"';
+				}
+			}
+
+			header('Cache-Control: no-cache, must-revalidate');
+			header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+			header('Content-type: application/json');
+			exit('({"entries":[' . implode(',', $entry_ids) . ']})');
+		}
+	}
+
+ */
+
+
 
 	function LiveSearchResults()
 	  {
@@ -1014,6 +1072,7 @@ ob_end_clean();
 
 		$livequery = $_GET["ls_get_query"];
 		$site_id = $_GET["sid"];
+		$allowed_weblogs = $_GET["wb"];
 
 		$results = array("entries" => 'entry', "comments" => 'comment');
 		
@@ -1023,6 +1082,10 @@ ob_end_clean();
 		$settings_md = mysql_query("SELECT `settings` FROM exp_extensions WHERE enabled = 'y' AND class = 'MD_livesearch' LIMIT 1") or die(mysql_error());
 		$settings_md = unserialize(mysql_result($settings_md, 0));
 		$settings_md = $settings_md[1];
+		
+		
+		// Get the weblogs the currently logged-in user has access to
+		
 		
 
 		//	Get searchable fields
